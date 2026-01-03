@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Eye, EyeOff, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { api } from "@/lib/api"
 
 export default function AdminSignup() {
   const [formData, setFormData] = useState({
@@ -44,10 +45,23 @@ export default function AdminSignup() {
 
     setLoading(true)
     try {
-      // TODO: Implement actual sign up
-      console.log("Admin signup:", formData, logoFile)
-    } catch (err) {
-      setError("Registration failed. Please try again.")
+      const formPayload = new FormData()
+      formPayload.append("email", formData.email)
+      formPayload.append("password", formData.password)
+      formPayload.append("company_name", formData.companyName)
+      formPayload.append("full_name", formData.name)
+      formPayload.append("phone", formData.phone)
+
+      if (logoFile) {
+        formPayload.append("logo", logoFile)
+      }
+
+      await api.postFormData("/auth/admin/register", formPayload)
+
+      // Redirect to login on success
+      window.location.href = "/auth/admin/login"
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.")
     } finally {
       setLoading(false)
     }
