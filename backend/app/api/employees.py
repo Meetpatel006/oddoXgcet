@@ -8,7 +8,7 @@ import string
 from pathlib import Path
 from datetime import date
 from app.database import get_db
-from app.models import User, EmployeeProfile, UserRole, BankDetail, Skill, EmployeeSkill, Certification, Attendance, LeaveRequest, LeaveStatus, UserSettings, LeaveBalance, LeaveType
+from app.models import User, EmployeeProfile, UserRole, BankDetail, Skill, EmployeeSkill, Certification, Attendance, LeaveRequest, LeaveStatus, UserSettings, LeaveBalance, LeaveType, Company
 from decimal import Decimal
 from app.schemas import EmployeeProfile as EmployeeProfileSchema, EmployeeProfileUpdate, BankDetail as BankDetailSchema, BankDetailCreate, BankDetailUpdate, Skill as SkillSchema, EmployeeSkillCreate, Certification as CertificationSchema, CertificationCreate, CertificationUpdate, EmployeeListResponse, EmployeeCreateBasic, EmployeeBasicResponse, EmployeeProfileMeResponse
 from app.auth.security import get_password_hash
@@ -212,10 +212,21 @@ def read_my_profile(
     if not employee_profile:
         raise HTTPException(status_code=404, detail="Employee profile not found for this user")
     
-    # Create response with email from user
+    # Get company details
+    company = db.query(Company).filter(Company.id == employee_profile.company_id).first()
+    company_name = company.name if company else None
+    company_logo = company.logo if company else None
+    
+    # Prepend backend URL to company logo if it's a relative path
+    if company_logo and not company_logo.startswith("http"):
+        company_logo = f"http://localhost:8000{company_logo}"
+    
+    # Create response with email from user and company info
     return EmployeeProfileMeResponse(
         **EmployeeProfileSchema.model_validate(employee_profile).model_dump(),
-        email=current_user.email
+        email=current_user.email,
+        company_name=company_name,
+        company_logo=company_logo
     )
 
 @router.get("/{employee_profile_id}", response_model=EmployeeProfileSchema)

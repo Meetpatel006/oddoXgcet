@@ -51,6 +51,7 @@ class EmployeeProfile(EmployeeProfileBase):
     user_id: int
     company_id: int
     employee_id: str
+    manager_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -76,3 +77,5 @@ class EmployeeListResponse(EmployeeProfile):
 
 class EmployeeProfileMeResponse(EmployeeProfile):
     email: str
+    company_name: Optional[str] = None
+    company_logo: Optional[str] = None

@@ -30,10 +30,37 @@ export default function AdminDashboardLayout({
 
   const isCheckedIn = status === 'checked-in'
 
-  const [companyLogo] = useState("/generic-company-logo.png")
-  const [userAvatar] = useState("/diverse-user-avatars.png")
-  const [userName] = useState("John Doe")
+  const [companyLogo, setCompanyLogo] = useState("/generic-company-logo.png")
+  const [companyName, setCompanyName] = useState("Dayflow")
+  const [userAvatar, setUserAvatar] = useState("/diverse-user-avatars.png")
+  const [userName, setUserName] = useState("User")
   const pathname = usePathname()
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        if (!token) return
+
+        const profile = await api.get("/employees/me", token)
+        if (profile) {
+          setUserName(`${profile.first_name} ${profile.last_name}`)
+          if (profile.profile_picture) {
+            setUserAvatar(profile.profile_picture)
+          }
+          if (profile.company_logo) {
+            setCompanyLogo(profile.company_logo)
+          }
+          if (profile.company_name) {
+            setCompanyName(profile.company_name)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error)
+      }
+    }
+    fetchProfile()
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -85,7 +112,7 @@ export default function AdminDashboardLayout({
                 alt="Company Logo"
                 className="w-10 h-10 rounded-lg object-cover"
               />
-              <span className="text-lg font-bold text-foreground hidden sm:block">Dayflow</span>
+              <span className="text-lg font-bold text-foreground hidden sm:block">{companyName}</span>
             </div>
 
             {/* Center Navigation Tabs */}

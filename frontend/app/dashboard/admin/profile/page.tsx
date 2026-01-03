@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Edit, User, Mail, Phone, Building2, MapPin, Briefcase, AlertCircle, Save, X, Upload, FileText, Award } from "lucide-react"
+import { Edit, User, Mail, Phone, Building2, MapPin, Briefcase, AlertCircle, Save, X, Upload, FileText, Award, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -52,22 +52,22 @@ export default function AdminProfile() {
     const std = (wage * (Number(salaryConfig.standardAllowancePercent) || 0)) / 100
     const perf = (basic * (Number(salaryConfig.performanceBonusPercent) || 0)) / 100
     const lta = (basic * (Number(salaryConfig.ltaPercent) || 0)) / 100
-    
+
     const totalAllocated = basic + hra + std + perf + lta
     const fixed = Math.max(0, wage - totalAllocated)
-    
+
     const pf = (basic * (Number(salaryConfig.pfPercent) || 0)) / 100
-    
+
     setSalaryStructure((prev: any) => ({
-        ...prev,
-        basic_salary: basic,
-        hra: hra,
-        standard_allowance: std,
-        performance_bonus: perf,
-        lta: lta,
-        fixed_allowance: fixed,
-        professional_tax: Number(salaryConfig.professionalTax) || 0,
-        pf_contribution: pf,
+      ...prev,
+      basic_salary: basic,
+      hra: hra,
+      standard_allowance: std,
+      performance_bonus: perf,
+      lta: lta,
+      fixed_allowance: fixed,
+      professional_tax: Number(salaryConfig.professionalTax) || 0,
+      pf_contribution: pf,
     }))
   }, [salaryConfig, isEditing])
 
@@ -81,7 +81,7 @@ export default function AdminProfile() {
       if (!token) return
 
       const data = await api.get("/employees/me", token)
-      
+
       // Merge API data with mock data for fields not yet in API
       const mergedData = {
         ...data,
@@ -112,22 +112,22 @@ export default function AdminProfile() {
       try {
         const salaryData = await api.get("/salary/me", token)
         if (salaryData) {
-            setSalaryStructure(salaryData)
-            
-            // Reverse calculate config
-            const totalEarnings = Number(salaryData.basic_salary) + Number(salaryData.hra) + Number(salaryData.standard_allowance) + Number(salaryData.performance_bonus) + Number(salaryData.lta) + Number(salaryData.fixed_allowance)
-            const basic = Number(salaryData.basic_salary)
-            
-            setSalaryConfig({
-                monthlyWage: totalEarnings,
-                basicPercent: totalEarnings ? (basic / totalEarnings) * 100 : 50,
-                hraPercent: basic ? (Number(salaryData.hra) / basic) * 100 : 50,
-                standardAllowancePercent: totalEarnings ? (Number(salaryData.standard_allowance) / totalEarnings) * 100 : 0,
-                performanceBonusPercent: basic ? (Number(salaryData.performance_bonus) / basic) * 100 : 0,
-                ltaPercent: basic ? (Number(salaryData.lta) / basic) * 100 : 0,
-                pfPercent: basic ? (Number(salaryData.pf_contribution) / basic) * 100 : 12,
-                professionalTax: Number(salaryData.professional_tax)
-            })
+          setSalaryStructure(salaryData)
+
+          // Reverse calculate config
+          const totalEarnings = Number(salaryData.basic_salary) + Number(salaryData.hra) + Number(salaryData.standard_allowance) + Number(salaryData.performance_bonus) + Number(salaryData.lta) + Number(salaryData.fixed_allowance)
+          const basic = Number(salaryData.basic_salary)
+
+          setSalaryConfig({
+            monthlyWage: totalEarnings,
+            basicPercent: totalEarnings ? (basic / totalEarnings) * 100 : 50,
+            hraPercent: basic ? (Number(salaryData.hra) / basic) * 100 : 50,
+            standardAllowancePercent: totalEarnings ? (Number(salaryData.standard_allowance) / totalEarnings) * 100 : 0,
+            performanceBonusPercent: basic ? (Number(salaryData.performance_bonus) / basic) * 100 : 0,
+            ltaPercent: basic ? (Number(salaryData.lta) / basic) * 100 : 0,
+            pfPercent: basic ? (Number(salaryData.pf_contribution) / basic) * 100 : 12,
+            professionalTax: Number(salaryData.professional_tax)
+          })
         }
       } catch (err) {
         console.log("No salary structure found, using defaults")
@@ -145,7 +145,7 @@ export default function AdminProfile() {
   }
 
   const handleConfigChange = (field: string, value: string) => {
-      setSalaryConfig(prev => ({ ...prev, [field]: parseFloat(value) || 0 }))
+    setSalaryConfig(prev => ({ ...prev, [field]: parseFloat(value) || 0 }))
   }
 
 
@@ -172,36 +172,36 @@ export default function AdminProfile() {
 
       // 2. Update Salary Structure
       if (salaryStructure.id) {
-          const salaryPayload = {
-              basic_salary: Number(salaryStructure.basic_salary),
-              hra: Number(salaryStructure.hra),
-              standard_allowance: Number(salaryStructure.standard_allowance),
-              performance_bonus: Number(salaryStructure.performance_bonus),
-              lta: Number(salaryStructure.lta),
-              fixed_allowance: Number(salaryStructure.fixed_allowance),
-              professional_tax: Number(salaryStructure.professional_tax),
-              pf_contribution: Number(salaryStructure.pf_contribution),
-          }
-          const updatedSalary = await api.put(`/salary/structure/${salaryStructure.id}`, salaryPayload, token)
-          setSalaryStructure(updatedSalary)
+        const salaryPayload = {
+          basic_salary: Number(salaryStructure.basic_salary),
+          hra: Number(salaryStructure.hra),
+          standard_allowance: Number(salaryStructure.standard_allowance),
+          performance_bonus: Number(salaryStructure.performance_bonus),
+          lta: Number(salaryStructure.lta),
+          fixed_allowance: Number(salaryStructure.fixed_allowance),
+          professional_tax: Number(salaryStructure.professional_tax),
+          pf_contribution: Number(salaryStructure.pf_contribution),
+        }
+        const updatedSalary = await api.put(`/salary/structure/${salaryStructure.id}`, salaryPayload, token)
+        setSalaryStructure(updatedSalary)
       } else {
-          try {
-             const salaryPayload = {
-                employee_profile_id: profileData.id,
-                basic_salary: Number(salaryStructure.basic_salary),
-                hra: Number(salaryStructure.hra),
-                standard_allowance: Number(salaryStructure.standard_allowance),
-                performance_bonus: Number(salaryStructure.performance_bonus),
-                lta: Number(salaryStructure.lta),
-                fixed_allowance: Number(salaryStructure.fixed_allowance),
-                professional_tax: Number(salaryStructure.professional_tax),
-                pf_contribution: Number(salaryStructure.pf_contribution),
-             }
-             const newSalary = await api.post("/salary/structure", salaryPayload, token)
-             setSalaryStructure(newSalary)
-          } catch (e) {
-              console.error("Failed to create salary structure", e)
+        try {
+          const salaryPayload = {
+            employee_profile_id: profileData.id,
+            basic_salary: Number(salaryStructure.basic_salary),
+            hra: Number(salaryStructure.hra),
+            standard_allowance: Number(salaryStructure.standard_allowance),
+            performance_bonus: Number(salaryStructure.performance_bonus),
+            lta: Number(salaryStructure.lta),
+            fixed_allowance: Number(salaryStructure.fixed_allowance),
+            professional_tax: Number(salaryStructure.professional_tax),
+            pf_contribution: Number(salaryStructure.pf_contribution),
           }
+          const newSalary = await api.post("/salary/structure", salaryPayload, token)
+          setSalaryStructure(newSalary)
+        } catch (e) {
+          console.error("Failed to create salary structure", e)
+        }
       }
 
       setIsEditing(false)
@@ -231,38 +231,46 @@ export default function AdminProfile() {
     formData.append("file", file)
 
     try {
-        const token = localStorage.getItem("token")
-        if (!token) return
+      const token = localStorage.getItem("token")
+      if (!token) return
 
-        const response = await fetch(`http://localhost:8000/api/v1/uploads/${type}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
-        })
+      const response = await fetch(`http://localhost:8000/api/v1/upload/${type}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      })
 
-        if (!response.ok) throw new Error('Upload failed')
+      if (!response.ok) throw new Error('Upload failed')
 
-        const data = await response.json()
-        
-        if (type === 'profile-picture') {
-            setProfileData({ ...profileData, profile_picture: `http://localhost:8000${data.url}` })
-            await api.put(`/employees/${profileData.id}`, { profile_picture: `http://localhost:8000${data.url}` }, token)
-            toast({ title: "Success", description: "Profile picture updated" })
-        } else if (type === 'resume') {
-             setProfileData({ ...profileData, resume_url: `http://localhost:8000${data.url}` })
-             await api.put(`/employees/${profileData.id}`, { resume_url: `http://localhost:8000${data.url}` }, token)
-             toast({ title: "Success", description: "Resume uploaded" })
-        } else if (type === 'certification') {
-             toast({ title: "Success", description: "Certification uploaded" })
+      const data = await response.json()
+
+      if (type === 'profile-picture') {
+        setProfileData({ ...profileData, profile_picture: `http://localhost:8000${data.url}` })
+        await api.put(`/employees/${profileData.id}`, { profile_picture: `http://localhost:8000${data.url}` }, token)
+        toast({ title: "Success", description: "Profile picture updated" })
+      } else if (type === 'resume') {
+        setProfileData({ ...profileData, resume_url: `http://localhost:8000${data.url}` })
+        await api.put(`/employees/${profileData.id}`, { resume_url: `http://localhost:8000${data.url}` }, token)
+        toast({ title: "Success", description: "Resume uploaded" })
+      } else if (type === 'certification') {
+        // Add the new certification to the list
+        const newCert = {
+          name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension for display name
+          certificate_url: `http://localhost:8000${data.url}`,
+          issue_date: new Date().toISOString().split('T')[0]
         }
+        const updatedCerts = [...(profileData.certifications || []), newCert]
+        setProfileData({ ...profileData, certifications: updatedCerts })
+        toast({ title: "Success", description: "Certification uploaded" })
+      }
 
     } catch (error) {
-        console.error(error)
-        toast({ title: "Error", description: "File upload failed", variant: "destructive" })
+      console.error(error)
+      toast({ title: "Error", description: "File upload failed", variant: "destructive" })
     } finally {
-        setUploading(false)
+      setUploading(false)
     }
   }
 
@@ -285,20 +293,20 @@ export default function AdminProfile() {
           </p>
         </div>
         <div>
-            {isEditing ? (
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>
-                        <X className="w-4 h-4 mr-2" /> Cancel
-                    </Button>
-                    <Button onClick={handleUpdate}>
-                        <Save className="w-4 h-4 mr-2" /> Save Changes
-                    </Button>
-                </div>
-            ) : (
-                <Button onClick={() => setIsEditing(true)}>
-                    <Edit className="w-4 h-4 mr-2" /> Edit Profile
-                </Button>
-            )}
+          {isEditing ? (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                <X className="w-4 h-4 mr-2" /> Cancel
+              </Button>
+              <Button onClick={handleUpdate}>
+                <Save className="w-4 h-4 mr-2" /> Save Changes
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={() => setIsEditing(true)}>
+              <Edit className="w-4 h-4 mr-2" /> Edit Profile
+            </Button>
+          )}
         </div>
       </div>
 
@@ -308,7 +316,7 @@ export default function AdminProfile() {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Left Side - Profile Picture */}
             <div className="flex flex-col items-center md:items-start">
-              <div className="relative group">
+              <div className="relative">
                 <img
                   src={profileData.profile_picture || "/placeholder.svg"}
                   alt={`${profileData.first_name} ${profileData.last_name}`}
@@ -317,17 +325,27 @@ export default function AdminProfile() {
                     e.currentTarget.src = "/placeholder.svg"
                   }}
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={() => document.getElementById('profile-upload')?.click()}>
-                    <Upload className="w-6 h-6 text-white" />
-                </div>
-                <input 
-                    type="file" 
-                    id="profile-upload" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'profile-picture')}
-                    disabled={uploading}
+                <input
+                  type="file"
+                  id="profile-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'profile-picture')}
+                  disabled={uploading}
                 />
+              </div>
+              {/* View and Upload buttons for profile picture */}
+              <div className="flex gap-2 mt-3">
+                {profileData.profile_picture && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={profileData.profile_picture} target="_blank" rel="noopener noreferrer">
+                      <Eye className="w-4 h-4 mr-1" /> View
+                    </a>
+                  </Button>
+                )}
+                <Button size="sm" onClick={() => document.getElementById('profile-upload')?.click()} disabled={uploading}>
+                  <Upload className="w-4 h-4 mr-1" /> {uploading ? "..." : "Upload"}
+                </Button>
               </div>
             </div>
 
@@ -336,20 +354,20 @@ export default function AdminProfile() {
               <div className="space-y-2">
                 <Label className="text-sm text-muted-foreground">Name</Label>
                 {isEditing ? (
-                    <div className="flex gap-2">
-                        <Input 
-                            value={formData.first_name} 
-                            onChange={(e) => handleInputChange("first_name", e.target.value)}
-                            placeholder="First Name"
-                        />
-                        <Input 
-                            value={formData.last_name} 
-                            onChange={(e) => handleInputChange("last_name", e.target.value)}
-                            placeholder="Last Name"
-                        />
-                    </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.first_name}
+                      onChange={(e) => handleInputChange("first_name", e.target.value)}
+                      placeholder="First Name"
+                    />
+                    <Input
+                      value={formData.last_name}
+                      onChange={(e) => handleInputChange("last_name", e.target.value)}
+                      placeholder="Last Name"
+                    />
+                  </div>
                 ) : (
-                    <p className="text-2xl font-bold text-foreground">{profileData.first_name} {profileData.last_name}</p>
+                  <p className="text-2xl font-bold text-foreground">{profileData.first_name} {profileData.last_name}</p>
                 )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -369,12 +387,12 @@ export default function AdminProfile() {
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-muted-foreground" />
                     {isEditing ? (
-                        <Input 
-                            value={formData.phone} 
-                            onChange={(e) => handleInputChange("phone", e.target.value)}
-                        />
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                      />
                     ) : (
-                        <p className="font-medium">{profileData.phone || "N/A"}</p>
+                      <p className="font-medium">{profileData.phone || "N/A"}</p>
                     )}
                   </div>
                 </div>
@@ -429,42 +447,44 @@ export default function AdminProfile() {
 
         {/* Resume Tab */}
         <TabsContent value="resume" className="space-y-6">
-            <Card className="mb-6">
-                <CardContent className="p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-lg">
-                            <FileText className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Resume</h3>
-                            <p className="text-sm text-muted-foreground">
-                                {profileData.resume_url ? "Resume uploaded" : "No resume uploaded"}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        {profileData.resume_url && (
-                            <Button variant="outline" asChild>
-                                <a href={profileData.resume_url} target="_blank" rel="noopener noreferrer">View</a>
-                            </Button>
-                        )}
-                        <div className="relative">
-                            <input
-                                type="file"
-                                id="resume-upload"
-                                className="hidden"
-                                accept=".pdf,.doc,.docx"
-                                onChange={(e) => handleFileUpload(e, 'resume')}
-                                disabled={uploading}
-                            />
-                            <Button onClick={() => document.getElementById('resume-upload')?.click()} disabled={uploading}>
-                                <Upload className="w-4 h-4 mr-2" />
-                                {uploading ? "Uploading..." : "Upload New"}
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card className="mb-6">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Resume</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {profileData.resume_url ? "Resume uploaded" : "No resume uploaded"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {profileData.resume_url && (
+                  <Button variant="outline" asChild>
+                    <a href={profileData.resume_url} target="_blank" rel="noopener noreferrer">
+                      <Eye className="w-4 h-4 mr-1" /> View
+                    </a>
+                  </Button>
+                )}
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="resume-upload"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleFileUpload(e, 'resume')}
+                    disabled={uploading}
+                  />
+                  <Button onClick={() => document.getElementById('resume-upload')?.click()} disabled={uploading}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploading ? "Uploading..." : "Upload New"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* About Section */}
@@ -527,151 +547,153 @@ export default function AdminProfile() {
 
         {/* Certifications Tab */}
         <TabsContent value="certifications" className="space-y-6">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Certifications</CardTitle>
-                    <div className="relative">
-                        <input
-                            type="file"
-                            id="cert-upload"
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={(e) => handleFileUpload(e, 'certification')}
-                            disabled={uploading}
-                        />
-                        <Button onClick={() => document.getElementById('cert-upload')?.click()} disabled={uploading}>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Add Certification
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Certifications</CardTitle>
+              <div className="relative">
+                <input
+                  type="file"
+                  id="cert-upload"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => handleFileUpload(e, 'certification')}
+                  disabled={uploading}
+                />
+                <Button onClick={() => document.getElementById('cert-upload')?.click()} disabled={uploading}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Add Certification
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {profileData.certifications && profileData.certifications.length > 0 ? (
+                <div className="grid gap-4">
+                  {profileData.certifications.map((cert: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-primary/10 rounded">
+                          <FileText className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{cert.name}</h4>
+                          <p className="text-sm text-muted-foreground">{cert.issue_date}</p>
+                        </div>
+                      </div>
+                      {cert.certificate_url && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer">
+                            <Eye className="w-4 h-4 mr-1" /> View
+                          </a>
                         </Button>
+                      )}
                     </div>
-                </CardHeader>
-                <CardContent>
-                    {profileData.certifications && profileData.certifications.length > 0 ? (
-                        <div className="grid gap-4">
-                            {profileData.certifications.map((cert: any, index: number) => (
-                                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 bg-primary/10 rounded">
-                                            <FileText className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-medium">{cert.name}</h4>
-                                            <p className="text-sm text-muted-foreground">{cert.issue_date}</p>
-                                        </div>
-                                    </div>
-                                    {cert.certificate_url && (
-                                        <Button variant="ghost" size="sm" asChild>
-                                            <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer">View</a>
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                            No certifications added yet.
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No certifications added yet.
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Private Info Tab */}
         <TabsContent value="private">
           <Card>
             <CardHeader>
-                <CardTitle>Private Information</CardTitle>
+              <CardTitle>Private Information</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label>Personal Email</Label>
-                        {isEditing ? (
-                            <Input 
-                                value={formData.personal_email} 
-                                onChange={(e) => handleInputChange("personal_email", e.target.value)}
-                                type="email"
-                            />
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md">{profileData.personal_email || "N/A"}</p>
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Date of Birth</Label>
-                        {isEditing ? (
-                            <Input 
-                                value={formData.date_of_birth} 
-                                onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
-                                type="date"
-                            />
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md">{profileData.date_of_birth || "N/A"}</p>
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Gender</Label>
-                        {isEditing ? (
-                            <Select 
-                                value={formData.gender} 
-                                onValueChange={(value) => handleInputChange("gender", value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Gender" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="male">Male</SelectItem>
-                                    <SelectItem value="female">Female</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md capitalize">{profileData.gender || "N/A"}</p>
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Marital Status</Label>
-                        {isEditing ? (
-                            <Select 
-                                value={formData.marital_status} 
-                                onValueChange={(value) => handleInputChange("marital_status", value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="single">Single</SelectItem>
-                                    <SelectItem value="married">Married</SelectItem>
-                                    <SelectItem value="divorced">Divorced</SelectItem>
-                                    <SelectItem value="widowed">Widowed</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md capitalize">{profileData.marital_status || "N/A"}</p>
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Nationality</Label>
-                        {isEditing ? (
-                            <Input 
-                                value={formData.nationality} 
-                                onChange={(e) => handleInputChange("nationality", e.target.value)}
-                            />
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md">{profileData.nationality || "N/A"}</p>
-                        )}
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label>Address</Label>
-                        {isEditing ? (
-                            <Textarea 
-                                value={formData.address} 
-                                onChange={(e) => handleInputChange("address", e.target.value)}
-                            />
-                        ) : (
-                            <p className="font-medium p-2 bg-muted rounded-md whitespace-pre-wrap">{profileData.address || "N/A"}</p>
-                        )}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Personal Email</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.personal_email}
+                      onChange={(e) => handleInputChange("personal_email", e.target.value)}
+                      type="email"
+                    />
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md">{profileData.personal_email || "N/A"}</p>
+                  )}
                 </div>
+                <div className="space-y-2">
+                  <Label>Date of Birth</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.date_of_birth}
+                      onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
+                      type="date"
+                    />
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md">{profileData.date_of_birth || "N/A"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Gender</Label>
+                  {isEditing ? (
+                    <Select
+                      value={formData.gender}
+                      onValueChange={(value) => handleInputChange("gender", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md capitalize">{profileData.gender || "N/A"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Marital Status</Label>
+                  {isEditing ? (
+                    <Select
+                      value={formData.marital_status}
+                      onValueChange={(value) => handleInputChange("marital_status", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single">Single</SelectItem>
+                        <SelectItem value="married">Married</SelectItem>
+                        <SelectItem value="divorced">Divorced</SelectItem>
+                        <SelectItem value="widowed">Widowed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md capitalize">{profileData.marital_status || "N/A"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Nationality</Label>
+                  {isEditing ? (
+                    <Input
+                      value={formData.nationality}
+                      onChange={(e) => handleInputChange("nationality", e.target.value)}
+                    />
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md">{profileData.nationality || "N/A"}</p>
+                  )}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Address</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={formData.address}
+                      onChange={(e) => handleInputChange("address", e.target.value)}
+                    />
+                  ) : (
+                    <p className="font-medium p-2 bg-muted rounded-md whitespace-pre-wrap">{profileData.address || "N/A"}</p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -694,17 +716,17 @@ export default function AdminProfile() {
                     <div className="space-y-1 mt-3">
                       <p className="font-medium text-foreground">- Wage Type</p>
                       <p className="ml-4">Fixed wage.</p>
-                      
+
                       <p className="font-medium text-foreground mt-2">- Salary Components</p>
                       <p className="ml-4">Section where users can define salary structure components.</p>
                       <p className="ml-4">Each component should include: Basic, House Rent Allowance, Standard Allowance, Performance Bonus, Leave Travel Allowance, Fixed Allowance</p>
-                      
+
                       <p className="ml-4 mt-2">Computation Type: Fixed Amount or Percentage of Wage</p>
                       <p className="ml-4">Value: Percentage field (e.g., 50% for Basic, 50% of Basic for HRA, etc.)</p>
-                      
+
                       <p className="ml-4 mt-2">Salary component values should auto-update when the wage amount changes.</p>
                       <p className="ml-4">The total of all components should not exceed the defined Wage</p>
-                      
+
                       <p className="font-medium text-foreground mt-2">- Automatic Calculation:</p>
                       <p className="ml-4">The system should calculate each component amount based on the employee's defined Wage.</p>
                       <p className="ml-4">Example: If Wage = ₹50,000 and Basic = 50% of wage, then Basic = ₹25,000.</p>
@@ -722,17 +744,17 @@ export default function AdminProfile() {
               <CardContent className="p-6 text-center">
                 <p className="text-sm text-muted-foreground mb-2">Month Wage</p>
                 {isEditing ? (
-                    <div className="flex items-center justify-center gap-2">
-                        <span className="text-lg font-bold">₹</span>
-                        <Input 
-                            type="number" 
-                            value={salaryConfig.monthlyWage} 
-                            onChange={(e) => handleConfigChange('monthlyWage', e.target.value)}
-                            className="w-32 text-center text-lg font-bold"
-                        />
-                    </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-lg font-bold">₹</span>
+                    <Input
+                      type="number"
+                      value={salaryConfig.monthlyWage}
+                      onChange={(e) => handleConfigChange('monthlyWage', e.target.value)}
+                      className="w-32 text-center text-lg font-bold"
+                    />
+                  </div>
                 ) : (
-                    <p className="text-3xl font-bold text-foreground">₹{Number(salaryConfig.monthlyWage).toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-foreground">₹{Number(salaryConfig.monthlyWage).toLocaleString()}</p>
                 )}
                 <p className="text-sm text-muted-foreground">/ Month</p>
               </CardContent>
@@ -762,12 +784,12 @@ export default function AdminProfile() {
               </p>
               <div className="space-y-3">
                 {[
-                    { key: 'basic_salary', configKey: 'basicPercent', label: 'Basic Salary', desc: 'Basic salary component' },
-                    { key: 'hra', configKey: 'hraPercent', label: 'House Rent Allowance', desc: 'HRA provided to employees 50% of the basic salary' },
-                    { key: 'standard_allowance', configKey: 'standardAllowancePercent', label: 'Standard Allowance', desc: 'A standard allowance is a predetermined, fixed amount' },
-                    { key: 'performance_bonus', configKey: 'performanceBonusPercent', label: 'Performance Bonus', desc: 'Variable amount paid during payroll' },
-                    { key: 'lta', configKey: 'ltaPercent', label: 'Leave Travel Allowance', desc: 'LTA is paid by the company to employees to cover their travel expenses' },
-                    { key: 'fixed_allowance', configKey: null, label: 'Fixed Allowance', desc: 'Fixed allowance portion of wages' },
+                  { key: 'basic_salary', configKey: 'basicPercent', label: 'Basic Salary', desc: 'Basic salary component' },
+                  { key: 'hra', configKey: 'hraPercent', label: 'House Rent Allowance', desc: 'HRA provided to employees 50% of the basic salary' },
+                  { key: 'standard_allowance', configKey: 'standardAllowancePercent', label: 'Standard Allowance', desc: 'A standard allowance is a predetermined, fixed amount' },
+                  { key: 'performance_bonus', configKey: 'performanceBonusPercent', label: 'Performance Bonus', desc: 'Variable amount paid during payroll' },
+                  { key: 'lta', configKey: 'ltaPercent', label: 'Leave Travel Allowance', desc: 'LTA is paid by the company to employees to cover their travel expenses' },
+                  { key: 'fixed_allowance', configKey: null, label: 'Fixed Allowance', desc: 'Fixed allowance portion of wages' },
                 ].map((component) => (
                   <div key={component.key} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
                     <div className="flex-1">
@@ -779,30 +801,30 @@ export default function AdminProfile() {
                         <p className="text-lg font-bold text-foreground">₹{Number(salaryStructure[component.key] || 0).toLocaleString()}</p>
                         <p className="text-sm text-muted-foreground">₹ / month</p>
                       </div>
-                      
+
                       {component.configKey && (
-                          <div className="w-24">
-                            {isEditing ? (
-                                <div className="flex items-center gap-1">
-                                    <Input 
-                                        type="number" 
-                                        value={salaryConfig[component.configKey as keyof typeof salaryConfig]} 
-                                        onChange={(e) => handleConfigChange(component.configKey!, e.target.value)}
-                                        className="text-right h-8"
-                                    />
-                                    <span className="text-sm text-muted-foreground">%</span>
-                                </div>
-                            ) : (
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                    {Number(salaryConfig[component.configKey as keyof typeof salaryConfig]).toFixed(2)}%
-                                </Badge>
-                            )}
-                          </div>
+                        <div className="w-24">
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                value={salaryConfig[component.configKey as keyof typeof salaryConfig]}
+                                onChange={(e) => handleConfigChange(component.configKey!, e.target.value)}
+                                className="text-right h-8"
+                              />
+                              <span className="text-sm text-muted-foreground">%</span>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              {Number(salaryConfig[component.configKey as keyof typeof salaryConfig]).toFixed(2)}%
+                            </Badge>
+                          )}
+                        </div>
                       )}
                       {!component.configKey && (
-                           <div className="w-24 text-right">
-                                <span className="text-sm text-muted-foreground">Balancing</span>
-                           </div>
+                        <div className="w-24 text-right">
+                          <span className="text-sm text-muted-foreground">Balancing</span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -824,27 +846,27 @@ export default function AdminProfile() {
                       <p className="text-xs text-muted-foreground mt-1">PF is calculated based on the basic salary</p>
                     </div>
                     <div className="text-right ml-4 flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="text-lg font-bold text-foreground">₹{Number(salaryStructure.pf_contribution || 0).toLocaleString()}</p>
-                            <p className="text-sm text-muted-foreground">₹ / month</p>
-                        </div>
-                        <div className="w-24">
-                            {isEditing ? (
-                                <div className="flex items-center gap-1">
-                                    <Input 
-                                        type="number" 
-                                        value={salaryConfig.pfPercent} 
-                                        onChange={(e) => handleConfigChange('pfPercent', e.target.value)}
-                                        className="text-right h-8"
-                                    />
-                                    <span className="text-sm text-muted-foreground">%</span>
-                                </div>
-                            ) : (
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    {Number(salaryConfig.pfPercent).toFixed(2)}%
-                                </Badge>
-                            )}
-                        </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-foreground">₹{Number(salaryStructure.pf_contribution || 0).toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">₹ / month</p>
+                      </div>
+                      <div className="w-24">
+                        {isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              value={salaryConfig.pfPercent}
+                              onChange={(e) => handleConfigChange('pfPercent', e.target.value)}
+                              className="text-right h-8"
+                            />
+                            <span className="text-sm text-muted-foreground">%</span>
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            {Number(salaryConfig.pfPercent).toFixed(2)}%
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -861,22 +883,22 @@ export default function AdminProfile() {
                     <p className="text-xs text-muted-foreground mt-1">Professional Tax deducted from the Gross salary</p>
                   </div>
                   <div className="text-right">
-                      {isEditing ? (
-                          <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">₹</span>
-                              <Input 
-                                  type="number" 
-                                  value={salaryConfig.professionalTax} 
-                                  onChange={(e) => handleConfigChange('professionalTax', e.target.value)}
-                                  className="w-32 text-right"
-                              />
-                          </div>
-                      ) : (
-                          <>
-                            <p className="text-lg font-bold text-foreground">₹{Number(salaryStructure.professional_tax || 0).toLocaleString()}</p>
-                            <p className="text-sm text-muted-foreground">₹ / month</p>
-                          </>
-                      )}
+                    {isEditing ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">₹</span>
+                        <Input
+                          type="number"
+                          value={salaryConfig.professionalTax}
+                          onChange={(e) => handleConfigChange('professionalTax', e.target.value)}
+                          className="w-32 text-right"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-lg font-bold text-foreground">₹{Number(salaryStructure.professional_tax || 0).toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">₹ / month</p>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
