@@ -46,6 +46,18 @@ export const ROUTES = {
       description: "Employee registration (disabled - admin only)",
       requiresAuth: false,
     },
+    HR_LOGIN: {
+      name: "HR Login",
+      path: "/auth/hr/login",
+      description: "HR authentication",
+      requiresAuth: false,
+    },
+    HR_SIGNUP: {
+      name: "HR Sign Up",
+      path: "/auth/hr/signup",
+      description: "HR registration",
+      requiresAuth: false,
+    },
   },
 
   // Dashboard Routes - Admin

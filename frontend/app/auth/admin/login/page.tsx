@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { api } from "@/lib/api"
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("")
@@ -21,11 +22,20 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      // TODO: Implement actual authentication
-      console.log("Admin login:", { email, password })
-      // Redirect to dashboard on success
-    } catch (err) {
-      setError("Invalid credentials. Please try again.")
+      const formPayload = new FormData()
+      formPayload.append("username", email)
+      formPayload.append("password", password)
+
+      const response = await api.postFormData("/auth/admin/login", formPayload)
+
+      // Store token
+      localStorage.setItem("token", response.access_token)
+      localStorage.setItem("role", "admin")
+
+      // Redirect to dashboard
+      window.location.href = "/dashboard/admin"
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials. Please try again.")
     } finally {
       setLoading(false)
     }
