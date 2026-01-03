@@ -53,3 +53,7 @@ class EmployeeProfile(EmployeeProfileBase):
 
     class Config:
         from_attributes = True
+
+class EmployeeListResponse(EmployeeProfile):
+    email: str
+    status: str = "pending"

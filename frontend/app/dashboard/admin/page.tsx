@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plane, Plus, Mail, Briefcase, Building2, Calendar, User, Phone, MapPin, Globe, Heart, CreditCard, Shield, AlertCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -39,114 +39,7 @@ interface Employee {
   empCode?: string
 }
 
-// Mock employee data
-const EMPLOYEES: Employee[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    email: "sarah.j@company.com",
-    image: "/employee-avatar.png",
-    status: "present",
-    jobPosition: "Senior Software Engineer",
-    department: "Engineering",
-    dateOfJoining: "Jan 15, 2024",
-    dateOfBirth: "March 15, 1992",
-    residingAddress: "123 Tech Street, San Francisco, CA 94102",
-    nationality: "American",
-    personalEmail: "sarah.personal@email.com",
-    gender: "Female",
-    maritalStatus: "Single",
-    mobile: "+1 (555) 123-4567",
-    company: "TechCorp Inc.",
-    manager: "John Smith",
-    location: "San Francisco",
-    accountNumber: "1234567890",
-    bankName: "Chase Bank",
-    ifscCode: "CHAS0001234",
-    panNo: "ABCDE1234F",
-    uanNo: "123456789012",
-    empCode: "EMP001",
-  },
-  {
-    id: "2",
-    name: "Mike Chen",
-    email: "mike.chen@company.com",
-    image: "/employee-avatar.png",
-    status: "absent",
-    jobPosition: "Product Manager",
-    department: "Product",
-    dateOfJoining: "Mar 22, 2024",
-    dateOfBirth: "July 22, 1988",
-    residingAddress: "456 Innovation Ave, Seattle, WA 98101",
-    nationality: "Canadian",
-    personalEmail: "mike.personal@email.com",
-    gender: "Male",
-    maritalStatus: "Married",
-    mobile: "+1 (555) 234-5678",
-    company: "TechCorp Inc.",
-    manager: "Sarah Wilson",
-    location: "Seattle",
-  },
-  {
-    id: "3",
-    name: "Emma Davis",
-    email: "emma.davis@company.com",
-    image: "/employee-avatar.png",
-    status: "leave",
-    jobPosition: "UX Designer",
-    department: "Design",
-    dateOfJoining: "Feb 10, 2024",
-    dateOfBirth: "December 8, 1995",
-    residingAddress: "789 Creative Blvd, Austin, TX 73301",
-    nationality: "American",
-    personalEmail: "emma.personal@email.com",
-    gender: "Female",
-    maritalStatus: "Single",
-    mobile: "+1 (555) 345-6789",
-    company: "TechCorp Inc.",
-    manager: "David Lee",
-    location: "Austin",
-  },
-  {
-    id: "4",
-    name: "Alex Martinez",
-    email: "alex.m@company.com",
-    image: "/employee-avatar.png",
-    status: "present",
-    jobPosition: "Marketing Specialist",
-    department: "Marketing",
-    dateOfJoining: "Apr 05, 2024",
-    mobile: "+1 (555) 456-7890",
-    company: "TechCorp Inc.",
-    location: "New York",
-  },
-  {
-    id: "5",
-    name: "Jessica Lee",
-    email: "jessica.lee@company.com",
-    image: "/employee-avatar.png",
-    status: "pending",
-    jobPosition: "HR Manager",
-    department: "Human Resources",
-    dateOfJoining: "May 18, 2024",
-    mobile: "+1 (555) 567-8901",
-    company: "TechCorp Inc.",
-    location: "Boston",
-  },
-  {
-    id: "6",
-    name: "David Brown",
-    email: "david.brown@company.com",
-    image: "/employee-avatar.png",
-    status: "present",
-    jobPosition: "Sales Executive",
-    department: "Sales",
-    dateOfJoining: "Jun 30, 2024",
-    mobile: "+1 (555) 678-9012",
-    company: "TechCorp Inc.",
-    location: "Chicago",
-  },
-]
+// Mock employee data removed - fetching from API
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -220,7 +113,61 @@ export default function AdminDashboard() {
   const [isNewEmployeeOpen, setIsNewEmployeeOpen] = useState(false)
   const [newEmployeeData, setNewEmployeeData] = useState<Partial<Employee>>({})
 
-  const filteredEmployees = EMPLOYEES.filter(
+  // New state for API data
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const token = localStorage.getItem("access_token")
+        const response = await fetch("http://localhost:8000/api/v1/employees/", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        })
+        
+        if (response.ok) {
+            const data = await response.json()
+            
+            const mappedEmployees: Employee[] = data.map((emp: any) => ({
+              id: emp.id.toString(),
+              name: `${emp.first_name} ${emp.last_name}`,
+              email: emp.email,
+              image: emp.profile_picture || "/employee-avatar.png",
+              status: emp.status || "pending",
+              jobPosition: emp.designation || "N/A",
+              department: emp.department || "N/A",
+              dateOfJoining: emp.joining_date || "N/A",
+              dateOfBirth: emp.date_of_birth,
+              residingAddress: emp.address,
+              nationality: emp.nationality,
+              personalEmail: emp.personal_email,
+              gender: emp.gender,
+              maritalStatus: emp.marital_status,
+              mobile: emp.phone,
+              company: "TechCorp Inc.", // Placeholder
+              manager: emp.manager_id ? `Manager #${emp.manager_id}` : "N/A",
+              location: "N/A",
+              empCode: emp.employee_id
+            }))
+            setEmployees(mappedEmployees)
+        } else {
+            console.error("Failed to fetch employees:", response.statusText)
+        }
+      } catch (err: any) {
+        console.error("Error fetching employees:", err)
+        setError("Failed to load employees")
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchEmployees()
+  }, [])
+
+  const filteredEmployees = employees.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.email.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -274,7 +221,22 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-12 text-destructive">
+          <p>{error}</p>
+        </div>
+      )}
+
       {/* Employee Cards Grid */}
+      {!loading && !error && (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEmployees.map((employee) => (
           <Card
@@ -328,6 +290,7 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </div>
+      )}
 
       {/* Empty State */}
       {filteredEmployees.length === 0 && (

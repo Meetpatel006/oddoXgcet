@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List
 import shutil
 from pathlib import Path
+from datetime import date
 from app.database import get_db
-from app.models import User, EmployeeProfile, UserRole, BankDetail, Skill, EmployeeSkill, Certification
-from app.schemas import EmployeeProfile as EmployeeProfileSchema, EmployeeProfileUpdate, BankDetail as BankDetailSchema, BankDetailCreate, BankDetailUpdate, Skill as SkillSchema, EmployeeSkillCreate, Certification as CertificationSchema, CertificationCreate, CertificationUpdate
+from app.models import User, EmployeeProfile, UserRole, BankDetail, Skill, EmployeeSkill, Certification, Attendance, LeaveRequest, LeaveStatus
+from app.schemas import EmployeeProfile as EmployeeProfileSchema, EmployeeProfileUpdate, BankDetail as BankDetailSchema, BankDetailCreate, BankDetailUpdate, Skill as SkillSchema, EmployeeSkillCreate, Certification as CertificationSchema, CertificationCreate, CertificationUpdate, EmployeeListResponse
 
 from app.auth.dependencies import get_current_active_user, get_current_active_user_with_roles
 
@@ -13,6 +14,83 @@ router = APIRouter()
 
 UPLOAD_DIR = Path("static/profile_pictures")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+@router.get("/", response_model=List[EmployeeListResponse])
+def read_all_employees(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user_with_roles([UserRole.ADMIN, UserRole.HR_OFFICER])),
+):
+    """
+    Retrieve all employees with status. (Admin or HR Officer only)
+    """
+    employees = db.query(EmployeeProfile).offset(skip).limit(limit).all()
+    
+    result = []
+    today = date.today()
+    
+    for emp in employees:
+        # Get email from User
+        email = emp.user.email if emp.user else ""
+        
+        # Determine status
+        status_val = "pending"
+        
+        # Check attendance
+        attendance = db.query(Attendance).filter(
+            Attendance.employee_profile_id == emp.id,
+            Attendance.date == today
+        ).first()
+        
+        if attendance:
+            status_val = attendance.status.value if hasattr(attendance.status, 'value') else str(attendance.status)
+        else:
+            # Check leave
+            leave = db.query(LeaveRequest).filter(
+                LeaveRequest.employee_profile_id == emp.id,
+                LeaveRequest.start_date <= today,
+                LeaveRequest.end_date >= today,
+                LeaveRequest.status == LeaveStatus.APPROVED
+            ).first()
+            
+            if leave:
+                status_val = "leave"
+            else:
+                status_val = "absent" 
+        
+        # Create response object
+        # We need to convert SQLAlchemy object to dict and add extra fields
+        # Pydantic's from_attributes=True handles the mapping from ORM object, 
+        # but we need to manually inject the extra fields not in the ORM model
+        
+        # A cleaner way with Pydantic v2 (if used) or just constructing it:
+        emp_data = EmployeeListResponse(
+            **{k: v for k, v in emp.__dict__.items() if k in EmployeeProfileSchema.model_fields},
+            id=emp.id,
+            user_id=emp.user_id,
+            company_id=emp.company_id,
+            employee_id=emp.employee_id,
+            manager_id=emp.manager_id,
+            first_name=emp.first_name,
+            last_name=emp.last_name,
+            phone=emp.phone,
+            date_of_birth=emp.date_of_birth,
+            gender=emp.gender,
+            marital_status=emp.marital_status,
+            nationality=emp.nationality,
+            address=emp.address,
+            personal_email=emp.personal_email,
+            department=emp.department,
+            designation=emp.designation,
+            joining_date=emp.joining_date,
+            profile_picture=emp.profile_picture,
+            email=email,
+            status=status_val
+        )
+        result.append(emp_data)
+        
+    return result
 
 @router.get("/me", response_model=EmployeeProfileSchema)
 def read_my_profile(
