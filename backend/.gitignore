@@ -1,0 +1,8 @@
+# todos
+__pycache__/
+*.pyc
+test.db
+.venv/
+.pytest_cache/
+.env
+docs
